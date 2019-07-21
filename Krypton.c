@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define DEBUG
+//#define DEBUG
 #define false   0
 #define true    1
 
@@ -14,6 +14,8 @@
 #define explode(STR, CHR) divideStringByIndex(STR, findCharOnString(STR, CHR));
 #define isdigit(CHR) (48 <= CHR && CHR <= 57)
 
+
+#define CMD_EXIT   "exit"
 #define CMD_PRINT   "print"
 #define CMD_CLEAR   "clear"
 #define CMD_GET     "$"
@@ -30,29 +32,28 @@ struct GlobalVariables
     int currentVariables;
 }typedef GlobalVariables;
 
+GlobalVariables globals;
+
 // The function assumes that there's no name collision
-char GlobalVariables_addVar(GlobalVariables globals, char *name, int val){
+GlobalVariables GlobalVariables_addVar(GlobalVariables var, char *name, int val){
     // if there's no more room
-    if(globals.currentVariables == globals.maxVariables){
-        return false;
+    if(var.currentVariables == var.maxVariables){
+        return var;
     }
-    
-    char * nameAddr = *(globals.variableNames + globals.currentVariables);
-    void * varAddr = globals.variableValues + globals.currentVariables;
 
-    *(globals.variableNames + globals.currentVariables) = name;
-    *(globals.variableValues + globals.currentVariables) = val;
+    char * nameAddr = *(var.variableNames + var.currentVariables);
+    void * varAddr = var.variableValues + var.currentVariables;
 
-    globals.currentVariables++;
+    *(var.variableNames + var.currentVariables) = name;
+    *(var.variableValues + var.currentVariables) = val;
 
-    printf("success\n");
+    var.currentVariables++;
 
-    return true;
 
+    return var;
 }
 
 // Globals
-GlobalVariables globals;
 
 char isNumber(char *s){
     int len = strlen(s);
@@ -127,11 +128,23 @@ char **divideStringByIndex(char *str, int index){
 int getIndexOnList(char **lst, int length, char *text){
     char **ptr = lst;
     char *current;
+    char null = false;
 
-    for (int i = 0; i < length; i++)
+    for (int i = 0; i < length && null == false; i++)
     {
-        current = *(ptr + i);
-        if(strncmp(current, text, strlen(current)) == 0){
+        ptr = lst + i;
+        current = *ptr;
+
+        if(current == NULL){
+            return -1;
+        }
+
+        if(*current == '\x00'){
+            null = true;
+            continue;
+        }
+
+        if(strcmp(text, current) == 0){
             return i;
         }
     }
@@ -139,8 +152,6 @@ int getIndexOnList(char **lst, int length, char *text){
 }
 
 void init(){
-    //variableNames = (char**)malloc(MAX_VARIABLES * sizeof(char**));
-    //variableValues = (void*)malloc(MAX_VARIABLES * sizeof(void*));
     globals.maxVariables = MAX_VARIABLES;
     globals.currentVariables = 0;
     globals.variableNames = (char**)malloc(MAX_VARIABLES * sizeof(char**));
@@ -151,18 +162,23 @@ void init(){
 }
 
 void parseCommand(char *buffer){
+    // print
     if(strEqu(buffer, CMD_PRINT)){
         fgets(buffer, BUFFER_SIZE, stdin);
         buffer++;
         printf("%s", buffer);
     }
+    // clear
     else if (strEqu(buffer, CMD_CLEAR))
     {
         system("clear");
     }
+    // get
     else if (strEqu(buffer, CMD_GET))
     {
-        printf("%d\n", getIndexOnList(globals.variableNames, globals.maxVariables, "asdads"));
+        int index = getIndexOnList(globals.variableNames, globals.maxVariables, buffer+1);
+        int value = *(globals.variableValues + index);
+        printf("%d\n", value);
     }
     else{
         int i;
@@ -174,13 +190,9 @@ void parseCommand(char *buffer){
             // If we've got a number
             if(isNumber(*(vars+1))){
                 int temp = atoi(*(vars+1));
-
-                //int *valAddr = (int*)malloc(sizeof(int));
-                //*valAddr = temp;
-
-                //free vars[1]
-
-                GlobalVariables_addVar(globals, *vars, temp);
+                // add the variable and save it in globals
+                globals = GlobalVariables_addVar(globals, *vars, temp);
+                free(vars[1]);
             }
 
         }
@@ -196,12 +208,16 @@ int main(){
     #ifndef DEBUG
     init();
 
+    // scan for input
     char buffer[BUFFER_SIZE];
+    printf("(krypton) ");
     scanf("%s", buffer);
 
-    while (strcmp(buffer, "exit") != 0)
+    // while not CMD_EXIT, parseCommand
+    while (strcmp(buffer, CMD_EXIT) != 0)
     {
         parseCommand(buffer);
+        printf("(krypton) ");
         scanf("%s", buffer);
     }
     
