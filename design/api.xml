@@ -1,0 +1,34 @@
+<API>
+
+	<Interpretation
+	 desc="Every keyword/function that makes the program 'understand' the input">
+
+	 <function
+	 	name		=	"figureValueType"
+	 	return-type	=	"char"
+	 	args		=	"char *value"
+	 	desc		=	"The function gets a value string and returns a char that indicates the value type eg. string, integer"
+	 	/>
+
+	 <function
+	 	name		=	"stripString"
+	 	return-type	=	"char*"
+	 	args		=	"char *text"
+	 	desc		=	"The function gets a spaced string and removes all the spaces"
+	 	/>
+
+	</Interpretation>
+
+	<Strings
+		desc = "Every keyword/function that's related to string formatting">
+
+		<function
+	 	name		=	"isReservedWord"
+	 	return-type	=	"char"
+	 	args		=	"char *word"
+	 	desc		=	"Returns true if word is reserved word"
+			/>
+
+	</Strings>
+
+</API>
