@@ -207,9 +207,11 @@ void init(){
 void parseCommand(char *buffer){
     // print
     if(strEqu(buffer, CMD_PRINT)){
-        fgets(buffer, BUFFER_SIZE, stdin);
-        buffer++;
-        printf("%s", buffer);
+        //printf("%s", buffer + sizeof(CMD_PRINT));
+        char *str = findStringLiteral(buffer);
+        if(str != NULL){
+            printf("%s", str);
+        }
     }
     // clear
     else if (strEqu(buffer, CMD_CLEAR))
@@ -221,7 +223,7 @@ void parseCommand(char *buffer){
     {
         int index = getIndexOnList(globals.variableNames, globals.maxVariables, buffer+1);
         if(index == -1){
-            printf("%s is not defined\n", buffer+1);
+            printf("%s is not defined\n", buffer);
         }
         else{
             int value = *(globals.variableValues + index);
@@ -256,45 +258,36 @@ int main(int argc, char *argv[]){
     if(argc != 2)
         exit(1);
 
-    #ifndef DEBUG
     init();
     if(strEqu(argv[1], EXECUTION_STDIN)){
         // scan for input
         char buffer[BUFFER_SIZE];
         printf("(krypton) ");
-        scanf("%s", buffer);
+        fgets(buffer, BUFFER_SIZE, stdin);
 
         // while not CMD_EXIT, parseCommand
         while (strcmp(buffer, CMD_EXIT) != 0)
         {
             parseCommand(buffer);
             printf("(krypton) ");
-            scanf("%s", buffer);
+            fgets(buffer, BUFFER_SIZE, stdin);
         }
     }
     else if (strEqu(argv[1], EXECUTION_FILE))
     {
         // scan for input
         char buffer[BUFFER_SIZE];
-        scanf("%s", buffer);
+        fgets(buffer, BUFFER_SIZE, stdin);
 
         // while not CMD_EXIT, parseCommand
         while (strcmp(buffer, CMD_EXIT) != 0)
         {
             parseCommand(buffer);
-            scanf("%s", buffer);
+            fgets(buffer, BUFFER_SIZE, stdin);
         }
     }
     else
         exit(1);
-    
-    #else
-    char buffer[100];
-    fgets(buffer, 100, stdin);
-
-    char *newStr = stripString(buffer);
-    printf(newStr);
-    #endif
 
     return 0;
 }
