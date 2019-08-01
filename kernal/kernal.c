@@ -175,6 +175,30 @@ char isReservedWord(char *word){
     return false;
 }
 
+int countChars( char* s, char c )
+{
+    return *s == '\0'
+              ? 0
+              : countChars( s + 1, c ) + (*s == c);
+}
+
+char countLiteral(char *str) { //return whether a string is a float
+    char *ptr;
+    int count = 0;
+    if (*str == '\"') count++;
+    for(ptr = str + 1; *ptr != 0; ptr++) {
+        if (*ptr == '\"' && *(ptr - 1)!='\\') count++;
+    }
+    return count;
+}
+
+char is_string(char *str) { //validates the given string
+    int countL = countLiteral(str);
+    if (countL != 2) return false;
+    else if (*str != "\"" || (*(str + strlen(str) - 1) != "\"" || *(str + strlen(str) - 2) == "\\")) return false;
+    return true;
+}
+
 char is_float(char* str) { //returns whether a string is a float
     int len;
     float ignore;
@@ -311,7 +335,7 @@ int main(int argc, char *argv[]){
     char buffer[100];
     fgets(buffer, 100, stdin);
 
-    char newStr = get_type(buffer);
+    char newStr = countLiteral(buffer);
     printf("%d\n", newStr);
     #endif
 
