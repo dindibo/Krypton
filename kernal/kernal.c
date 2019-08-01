@@ -195,7 +195,13 @@ char countLiteral(char *str) { //return whether a string is a float
 char is_string(char *str) { //validates the given string
     int countL = countLiteral(str);
     if (countL != 2) return false;
-    else if (*str != "\"" || (*(str + strlen(str) - 1) != "\"" || *(str + strlen(str) - 2) == "\\")) return false;
+    else if (!(*str == '\"' && *(str + strlen(str) - 2) == '\"' && *(str + strlen(str) - 3) != '\\')) return false;
+    else {
+        char *ptr;
+        for(ptr = str; *(ptr + 1) != 0; ptr++) {
+            if (*ptr == '\\' && *(ptr + 1) != 'n' && *(ptr + 1) != 't' && *(ptr + 1) != '\"' && *(ptr + 1) != '\\' && *(ptr + 1) != 'r') return false;
+        }
+    }
     return true;
 }
 
@@ -335,7 +341,7 @@ int main(int argc, char *argv[]){
     char buffer[100];
     fgets(buffer, 100, stdin);
 
-    char newStr = countLiteral(buffer);
+    char newStr = is_string(buffer);
     printf("%d\n", newStr);
     #endif
 
