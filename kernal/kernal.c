@@ -119,6 +119,9 @@ int findCharOnString(char *str, char chr){
     return result;
 }
 
+
+
+
 char **divideStringByIndex(char *str, int index){
     int length = strlen(str);
 
@@ -135,6 +138,87 @@ char **divideStringByIndex(char *str, int index){
     *dual = buffer1;
     *(dual + 1) = buffer2;
     return dual;
+}
+
+// Retutns -1 if string isn't valid else returns num of chars in interpreted string
+int isValidString(char *str){
+  char *ptr = str;
+  int counter = *ptr == "\""[0] && *(ptr+1) != 0 ? 0 : -1;
+  ptr++;
+
+  for(; *ptr != 0 && counter != -1; ptr++){
+
+      printf("%c\n", *ptr);
+    
+    if(*ptr == '\\'){
+
+      if(*(ptr+1) == 0){
+        counter = -1;
+      }
+      else{
+        if(*(ptr+1) == 'n'
+          || *(ptr + 1) == 'r'
+          || *(ptr + 1) == '\\'
+          || *(ptr + 1) == 't'
+          || *(ptr + 1) == '\"'){
+          counter++;
+          ptr++;
+        }
+        else{
+          counter = -1;
+        }
+      }
+    }
+    else if(*ptr == '\"'){
+        if(*(ptr + 1) != 0){
+            counter = -1;
+        }
+        else{
+            counter--;
+        }
+    }
+    else{
+      counter++;
+    }
+    
+  }
+  
+  return counter + 1;
+}
+
+// Gets a VALID string and returns the interpreted string. Warning: this function might have unexpected results if invalid string is provided
+char *interpretString(char* raw, int bufferSize){
+    char *buffer = (char*)malloc(bufferSize + 1);
+    int counter = 0;
+    // skipping the first "
+    char *ptr = raw + 1;
+    for (; *ptr != '"' && *(ptr+1) != 0; ptr++)
+    {
+        if(*ptr == '\\'){
+            if(*(ptr + 1) == 'n'){
+                buffer[counter] = '\n';
+            }
+            else if(*(ptr + 1) == 't'){
+                buffer[counter] = '\t';
+            }
+            else if(*(ptr + 1) == '\\'){
+                buffer[counter] = '\\';
+            }
+            else if(*(ptr + 1) == '"'){
+                buffer[counter] = '"';
+            }
+            else if(*(ptr + 1) == 'r'){
+                buffer[counter] = '\r';
+            }
+            ptr++;
+        }
+        else{
+            buffer[counter] = (char)*ptr;
+        }
+        counter++;
+    }
+    buffer[counter + 1] = 0;
+    return buffer;
 }
 
 // finds the index of text in lst, else -1
@@ -159,7 +243,7 @@ int getIndexOnList(char **lst, int length, char *text){
 
         if(strcmp(text, current) == 0){
             return i;
-        }
+        }// xdxdxd
     }
     return -1;
 }
@@ -173,36 +257,6 @@ char isReservedWord(char *word){
         return true;
     }
     return false;
-}
-
-int countChars( char* s, char c )
-{
-    return *s == '\0'
-              ? 0
-              : countChars( s + 1, c ) + (*s == c);
-}
-
-char countLiteral(char *str) { //return whether a string is a float
-    char *ptr;
-    int count = 0;
-    if (*str == '\"') count++;
-    for(ptr = str + 1; *ptr != 0; ptr++) {
-        if (*ptr == '\"' && *(ptr - 1)!='\\') count++;
-    }
-    return count;
-}
-
-char is_string(char *str) { //validates the given string
-    int countL = countLiteral(str);
-    if (countL != 2) return false;
-    else if (!(*str == '\"' && *(str + strlen(str) - 2) == '\"' && *(str + strlen(str) - 3) != '\\')) return false;
-    else {
-        char *ptr;
-        for(ptr = str; *(ptr + 1) != 0; ptr++) {
-            if (*ptr == '\\' && *(ptr + 1) != 'n' && *(ptr + 1) != 't' && *(ptr + 1) != '\"' && *(ptr + 1) != '\\' && *(ptr + 1) != 'r') return false;
-        }
-    }
-    return true;
 }
 
 char is_float(char* str) { //returns whether a string is a float
@@ -341,7 +395,7 @@ int main(int argc, char *argv[]){
     char buffer[100];
     fgets(buffer, 100, stdin);
 
-    char newStr = is_string(buffer);
+    char newStr = get_type(buffer);
     printf("%d\n", newStr);
     #endif
 

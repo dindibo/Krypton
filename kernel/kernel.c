@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define DEBUG
+//#define DEBUG
 #define false   0
 #define true    1
 
@@ -28,11 +28,6 @@
 #define EXECUTION_STDIN     "0"
 #define EXECUTION_FILE      "1"
 
-#define UNKNOWN             0
-#define INTEGER             1
-#define FLOAT               2
-#define STRING              3
-#define BOOLEAN             4
 
 // TODO: replace strlen(CMD) with const number
 
@@ -40,7 +35,7 @@
 struct GlobalVariables
 {
     char **variableNames;
-    int *variableValues;    
+    int *variableValues;
     int maxVariables;
     int currentVariables;
 }typedef GlobalVariables;
@@ -119,9 +114,6 @@ int findCharOnString(char *str, char chr){
     return result;
 }
 
-
-
-
 char **divideStringByIndex(char *str, int index){
     int length = strlen(str);
 
@@ -138,57 +130,6 @@ char **divideStringByIndex(char *str, int index){
     *dual = buffer1;
     *(dual + 1) = buffer2;
     return dual;
-}
-
-// Retutns -1 if string isn't valid else returns num of chars in interpreted string
-int isValidString(char *str){
-  char *ptr = str;
-  int counter = *ptr == "\""[0] && *(ptr+1) != 0 ? 0 : -1;
-  ptr++;
-
-  for(; *ptr != 0 && counter != -1; ptr++){
-
-      printf("%c\n", *ptr);
-    
-    if(*ptr == '\\'){
-
-      if(*(ptr+1) == 0){
-        counter = -1;
-      }
-      else{
-        if(*(ptr+1) == 'n'
-          || *(ptr + 1) == 'r'
-          || *(ptr + 1) == '\\'
-          || *(ptr + 1) == 't'
-          || *(ptr + 1) == '\"'){
-          counter++;
-          ptr++;
-        }
-        else{
-          counter = -1;
-        }
-      }
-    }
-    else if(*ptr == '\"'){
-        if(*(ptr + 1) != 0){
-            counter = -1;
-        }
-        else{
-            counter--;
-        }
-    }
-    else{
-      counter++;
-    }
-    
-  }
-  
-  return counter + 1;
-}
-
-// Gets a VALID string and returns the interpreted string. Warning: this function might have unexpected results if invalid string is provided
-char *interpretString(char* raw, int bufferSize){
-    char *buffer = (char*)malloc(bufferSize + 1);
 }
 
 // finds the index of text in lst, else -1
@@ -227,20 +168,6 @@ char isReservedWord(char *word){
         return true;
     }
     return false;
-}
-
-char is_float(char* str) { //returns whether a string is a float
-    int len;
-    float ignore;
-    int ret = sscanf(str, "%f %n", &ignore, &len);
-    return ret==1 && !str[len];
-}
-
-char get_type(char *text) {
-    char type = UNKNOWN;
-    if(isNumber(text)) type = INTEGER;
-    else if(is_float(text)) type = FLOAT;
-    return type;
 }
 
 // The function gets a spaced string and copy the string to the heap without spaces
@@ -365,8 +292,8 @@ int main(int argc, char *argv[]){
     char buffer[100];
     fgets(buffer, 100, stdin);
 
-    char newStr = get_type(buffer);
-    printf("%d\n", newStr);
+    char *newStr = stripString(buffer);
+    printf(newStr);
     #endif
 
     return 0;
