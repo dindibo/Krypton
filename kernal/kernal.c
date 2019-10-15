@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define DEBUG
+//#define DEBUG
 #define false   0
 #define true    1
 
@@ -190,8 +190,14 @@ int isValidString(char *str){
 char *interpretString(char* raw, int bufferSize){
     char *buffer = (char*)malloc(bufferSize + 1);
     int counter = 0;
+
+    char *ptr = raw;
+
+    while (*ptr == ' ')
+        ptr++;
+    
     // skipping the first "
-    char *ptr = raw + 1;
+    ptr++;
     for (; *ptr != '"' && *(ptr+1) != 0; ptr++)
     {
         if(*ptr == '\\'){
@@ -209,6 +215,9 @@ char *interpretString(char* raw, int bufferSize){
             }
             else if(*(ptr + 1) == 'r'){
                 buffer[counter] = '\r';
+            }
+            else if(*(ptr + 1) == '\''){
+                buffer[counter] = '\'';
             }
             ptr++;
         }
@@ -311,8 +320,9 @@ void parseCommand(char *buffer){
     // print
     if(strEqu(buffer, CMD_PRINT)){
         fgets(buffer, BUFFER_SIZE, stdin);
-        buffer++;
-        printf("%s", buffer);
+        char *interpreted = interpretString(buffer, BUFFER_SIZE);
+        printf("%s\n", interpreted);
+        free(interpreted);
     }
     // clear
     else if (strEqu(buffer, CMD_CLEAR))
@@ -392,11 +402,21 @@ int main(int argc, char *argv[]){
         exit(1);
     
     #else
-    char buffer[100];
+
+    /*char buffer[100];
     fgets(buffer, 100, stdin);
 
     char newStr = get_type(buffer);
-    printf("%d\n", newStr);
+    printf("%d\n", newStr);*/
+
+    char buffer[100];
+    char buffer2[100];
+
+    fgets(buffer, sizeof(buffer), stdin);
+    char * newBuffer = interpretString(buffer, 100);
+
+    printf("%s\n", newBuffer);
+
     #endif
 
     return 0;
